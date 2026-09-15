@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sports Analytics Workbench</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Sample basketball dataset</p>
+          <h1>Sports Analytics Workbench</h1>
+        </div>
+        <div class="topbar-actions" aria-label="Dashboard controls">
+          <label class="field">
+            <span>Team</span>
+            <select id="teamSelect"></select>
+          </label>
+          <label class="field">
+            <span>Opponent</span>
+            <select id="opponentSelect"></select>
+          </label>
+        </div>
+      </header>
+
+      <section class="metric-grid" aria-label="Team summary">
+        <article class="metric-card">
+          <span>Net rating</span>
+          <strong id="netRating">0.0</strong>
+          <em id="netContext">League rank</em>
+        </article>
+        <article class="metric-card">
+          <span>Projected win chance</span>
+          <strong id="winChance">0%</strong>
+          <em id="winContext">Neutral court</em>
+        </article>
+        <article class="metric-card">
+          <span>Four factors edge</span>
+          <strong id="factorEdge">0</strong>
+          <em id="factorContext">Weighted index</em>
+        </article>
+        <article class="metric-card">
+          <span>Rotation trust</span>
+          <strong id="rotationTrust">0</strong>
+          <em id="rotationContext">Bench adjusted</em>
+        </article>
+      </section>
+
+      <section class="workspace-grid">
+        <article class="panel trend-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Performance Trend</h2>
+              <p>Last 12 games, adjusted for opponent quality</p>
+            </div>
+            <div class="segmented-control" role="group" aria-label="Trend metric">
+              <button class="is-active" type="button" data-trend="net">Net</button>
+              <button type="button" data-trend="offense">Off</button>
+              <button type="button" data-trend="defense">Def</button>
+            </div>
+          </div>
+          <div id="trendChart" class="chart" role="img" aria-label="Line chart comparing selected team and opponent"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Four Factors</h2>
+              <p>Team profile versus opponent</p>
+            </div>
+          </div>
+          <div id="factorChart" class="factor-chart" aria-label="Four factors bar chart"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Shot Profile</h2>
+              <p>Expected points by zone</p>
+            </div>
+          </div>
+          <div id="shotChart" class="shot-chart" aria-label="Shot profile court visualization"></div>
+        </article>
+
+        <article class="panel scenario-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Matchup Scenario</h2>
+              <p>Adjust pace and ball security</p>
+            </div>
+          </div>
+          <div class="slider-grid">
+            <label class="range-field">
+              <span>Pace change <strong id="paceValue">0</strong></span>
+              <input id="paceSlider" type="range" min="-6" max="6" value="0" />
+            </label>
+            <label class="range-field">
+              <span>Turnover swing <strong id="turnoverValue">0</strong></span>
+              <input id="turnoverSlider" type="range" min="-4" max="4" value="0" />
+            </label>
+            <label class="range-field">
+              <span>Home court <strong id="homeValue">0</strong></span>
+              <input id="homeSlider" type="range" min="-3" max="3" value="0" />
+            </label>
+          </div>
+          <div class="scenario-output" aria-live="polite">
+            <div>
+              <span>Projected margin</span>
+              <strong id="projectedMargin">0.0</strong>
+            </div>
+            <div>
+              <span>Expected total</span>
+              <strong id="expectedTotal">0.0</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel table-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Player Efficiency</h2>
+              <p>Sortable rotation snapshot</p>
+            </div>
+            <button id="sortPlayers" type="button" class="utility-button" aria-label="Toggle player sort order">
+              Sort
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Player</th>
+                  <th scope="col">Role</th>
+                  <th scope="col" class="numeric">Usage</th>
+                  <th scope="col" class="numeric">TS%</th>
+                  <th scope="col" class="numeric">On-off</th>
+                </tr>
+              </thead>
+              <tbody id="playerTable"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel insight-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Model Notes</h2>
+              <p>Signals generated from the selected matchup</p>
+            </div>
+          </div>
+          <ul id="insightList" class="insight-list"></ul>
+        </article>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
