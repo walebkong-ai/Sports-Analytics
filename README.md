@@ -20,6 +20,19 @@ The app is not a wagering product and does not provide betting recommendations.
 
 Open `index.html` in a browser. No install step is required.
 
+## Market comparison MVP
+
+Run `node server.cjs` (Node 20+) and open http://127.0.0.1:4173/market.html.
+Without credentials the scanner uses explicitly synthetic quotes and a sample prediction.
+Set `ODDS_API_KEY` in the server environment to fetch The Odds API NFL moneylines.
+Set `PREDICTIONS_FILE` to a JSON array of mapped model predictions with:
+`gameId`, `homeProbability`, `timestamp`, `featureCutoff`, `probabilityBasis` (must be `decisive_result`), `modelVersion`, `confidence`, `factors`, and optional `uncertainties`.
+Use provider event IDs, UTC ISO timestamps and probabilities between zero and one.
+The existing predictor remains a static prototype; it is not automatically mapped to live events.
+Live games without valid mapped predictions show data quality warnings.
+API endpoints use the `/api` prefix. Provider payload and prediction snapshots are saved to ignored `.market-data/` files; the SQL schema documents the production normalized database.
+See [the architecture and validation plan](docs/market-comparison-plan.md).
+
 ## Modeling approach
 
 Start simple and compare models chronologically:
