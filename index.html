@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sports Analytics Workbench</title>
+    <title>NFL Game Predictor</title>
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -11,147 +11,169 @@
     <main class="app-shell">
       <header class="topbar">
         <div>
-          <p class="eyebrow">Sample basketball dataset</p>
-          <h1>Sports Analytics Workbench</h1>
+          <p class="eyebrow">No-leakage forecasting prototype</p>
+          <h1>NFL Game Predictor</h1>
         </div>
-        <div class="topbar-actions" aria-label="Dashboard controls">
+        <div class="topbar-actions" aria-label="Prediction controls">
           <label class="field">
-            <span>Team</span>
-            <select id="teamSelect"></select>
+            <span>Game</span>
+            <select id="gameSelect"></select>
           </label>
           <label class="field">
-            <span>Opponent</span>
-            <select id="opponentSelect"></select>
+            <span>Model view</span>
+            <select id="modelSelect">
+              <option value="logistic">Logistic regression</option>
+              <option value="elo">Elo baseline</option>
+              <option value="gbt">Gradient boosted trees</option>
+            </select>
           </label>
         </div>
       </header>
 
-      <section class="metric-grid" aria-label="Team summary">
+      <section class="prediction-hero" aria-label="Game prediction">
+        <article class="team-card">
+          <span id="awayLabel">Away</span>
+          <strong id="awayTeam">Away team</strong>
+          <em id="awayProbability">0%</em>
+        </article>
+        <div class="versus-block">
+          <span>vs</span>
+          <div id="probabilityBar" class="probability-bar" aria-label="Win probability split">
+            <i id="homeProbabilityFill"></i>
+          </div>
+        </div>
+        <article class="team-card is-home">
+          <span id="homeLabel">Home</span>
+          <strong id="homeTeam">Home team</strong>
+          <em id="homeProbability">0%</em>
+        </article>
+      </section>
+
+      <section class="metric-grid" aria-label="Prediction summary">
         <article class="metric-card">
-          <span>Net rating</span>
-          <strong id="netRating">0.0</strong>
-          <em id="netContext">League rank</em>
+          <span>Predicted winner</span>
+          <strong id="predictedWinner">-</strong>
+          <em id="winnerContext">Model output</em>
         </article>
         <article class="metric-card">
-          <span>Projected win chance</span>
-          <strong id="winChance">0%</strong>
-          <em id="winContext">Neutral court</em>
+          <span>Confidence</span>
+          <strong id="confidenceTier">-</strong>
+          <em id="confidenceContext">Probability based</em>
         </article>
         <article class="metric-card">
-          <span>Four factors edge</span>
-          <strong id="factorEdge">0</strong>
-          <em id="factorContext">Weighted index</em>
+          <span>Expected margin</span>
+          <strong id="predictedMargin">0.0</strong>
+          <em id="marginContext">Home score minus away score</em>
         </article>
         <article class="metric-card">
-          <span>Rotation trust</span>
-          <strong id="rotationTrust">0</strong>
-          <em id="rotationContext">Bench adjusted</em>
+          <span>Projected score</span>
+          <strong id="projectedScore">0-0</strong>
+          <em>Use margin when scores are noisy</em>
         </article>
       </section>
 
       <section class="workspace-grid">
-        <article class="panel trend-panel">
+        <article class="panel">
           <div class="panel-header">
             <div>
-              <h2>Performance Trend</h2>
-              <p>Last 12 games, adjusted for opponent quality</p>
-            </div>
-            <div class="segmented-control" role="group" aria-label="Trend metric">
-              <button class="is-active" type="button" data-trend="net">Net</button>
-              <button type="button" data-trend="offense">Off</button>
-              <button type="button" data-trend="defense">Def</button>
+              <h2>Why This Prediction</h2>
+              <p>Feature contributions from the selected model view</p>
             </div>
           </div>
-          <div id="trendChart" class="chart" role="img" aria-label="Line chart comparing selected team and opponent"></div>
+          <div id="featureChart" class="feature-chart" aria-label="Feature contribution chart"></div>
         </article>
 
         <article class="panel">
           <div class="panel-header">
             <div>
-              <h2>Four Factors</h2>
-              <p>Team profile versus opponent</p>
+              <h2>Main Factors</h2>
+              <p>Generated only from feature values and contributions</p>
             </div>
           </div>
-          <div id="factorChart" class="factor-chart" aria-label="Four factors bar chart"></div>
-        </article>
-
-        <article class="panel">
-          <div class="panel-header">
-            <div>
-              <h2>Shot Profile</h2>
-              <p>Expected points by zone</p>
-            </div>
-          </div>
-          <div id="shotChart" class="shot-chart" aria-label="Shot profile court visualization"></div>
-        </article>
-
-        <article class="panel scenario-panel">
-          <div class="panel-header">
-            <div>
-              <h2>Matchup Scenario</h2>
-              <p>Adjust pace and ball security</p>
-            </div>
-          </div>
-          <div class="slider-grid">
-            <label class="range-field">
-              <span>Pace change <strong id="paceValue">0</strong></span>
-              <input id="paceSlider" type="range" min="-6" max="6" value="0" />
-            </label>
-            <label class="range-field">
-              <span>Turnover swing <strong id="turnoverValue">0</strong></span>
-              <input id="turnoverSlider" type="range" min="-4" max="4" value="0" />
-            </label>
-            <label class="range-field">
-              <span>Home court <strong id="homeValue">0</strong></span>
-              <input id="homeSlider" type="range" min="-3" max="3" value="0" />
-            </label>
-          </div>
-          <div class="scenario-output" aria-live="polite">
-            <div>
-              <span>Projected margin</span>
-              <strong id="projectedMargin">0.0</strong>
-            </div>
-            <div>
-              <span>Expected total</span>
-              <strong id="expectedTotal">0.0</strong>
-            </div>
+          <div class="factor-columns">
+            <section>
+              <h3>Advantages</h3>
+              <ul id="positiveFactors" class="insight-list"></ul>
+            </section>
+            <section>
+              <h3>Risks</h3>
+              <ul id="negativeFactors" class="insight-list risk-list"></ul>
+            </section>
           </div>
         </article>
 
         <article class="panel table-panel">
           <div class="panel-header">
             <div>
-              <h2>Player Efficiency</h2>
-              <p>Sortable rotation snapshot</p>
+              <h2>Team Comparison</h2>
+              <p>All values are pre-game features for this sample row</p>
             </div>
-            <button id="sortPlayers" type="button" class="utility-button" aria-label="Toggle player sort order">
-              Sort
-            </button>
           </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th scope="col">Player</th>
-                  <th scope="col">Role</th>
-                  <th scope="col" class="numeric">Usage</th>
-                  <th scope="col" class="numeric">TS%</th>
-                  <th scope="col" class="numeric">On-off</th>
+                  <th scope="col">Metric</th>
+                  <th id="awayMetricHeader" scope="col" class="numeric">Away</th>
+                  <th id="homeMetricHeader" scope="col" class="numeric">Home</th>
+                  <th scope="col" class="numeric">Edge</th>
                 </tr>
               </thead>
-              <tbody id="playerTable"></tbody>
+              <tbody id="comparisonTable"></tbody>
             </table>
           </div>
         </article>
 
-        <article class="panel insight-panel">
+        <article class="panel">
           <div class="panel-header">
             <div>
-              <h2>Model Notes</h2>
-              <p>Signals generated from the selected matchup</p>
+              <h2>Model History</h2>
+              <p>Out-of-sample validation snapshot</p>
             </div>
           </div>
-          <ul id="insightList" class="insight-list"></ul>
+          <div class="history-grid">
+            <div>
+              <span>Accuracy</span>
+              <strong id="historyAccuracy">0%</strong>
+            </div>
+            <div>
+              <span>Brier score</span>
+              <strong id="historyBrier">0.000</strong>
+            </div>
+            <div>
+              <span>Log loss</span>
+              <strong id="historyLogLoss">0.000</strong>
+            </div>
+            <div>
+              <span>ROC-AUC</span>
+              <strong id="historyAuc">0.000</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel calibration-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Calibration</h2>
+              <p>Predicted confidence versus actual win rate</p>
+            </div>
+          </div>
+          <div id="calibrationChart" class="calibration-chart" aria-label="Calibration bucket chart"></div>
+        </article>
+
+        <article class="panel guardrail-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Leakage Guardrails</h2>
+              <p>Every production feature needs available-before-game logic</p>
+            </div>
+          </div>
+          <ul class="check-list">
+            <li>Use only games completed before kickoff.</li>
+            <li>Build rolling last-3, last-5, and season-to-date features chronologically.</li>
+            <li>Store predictions before games begin and evaluate them after finals.</li>
+            <li>Keep LLM explanations downstream of structured model output.</li>
+          </ul>
         </article>
       </section>
     </main>
