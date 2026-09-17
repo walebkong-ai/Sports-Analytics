@@ -22,6 +22,18 @@ Open `index.html` in a browser. No install step is required.
 
 ## Market comparison MVP
 
+### Live connections
+
+Use Node 22+ and Python 3.9+. Create a local `.env` using `.env.example`, and enter your own key from https://the-odds-api.com/.
+Run `npm run model:refresh` to download nflverse completed results and create timestamped Elo baseline predictions, then `npm start`.
+Open http://127.0.0.1:4174/market.html (the example configuration uses port 4174).
+The key stays on the server; `.env` and downloaded snapshots are ignored by Git.
+GET `/api/model-status` reports credential presence, baseline predictions and measured sequential validation without revealing the key.
+
+The generated baseline matches provider games by exact full team names and kickoff within one minute, requires a unique match, and expires after 24 hours. Refresh before comparing. A postponed or unmatched event receives no fabricated prediction.
+The model uses fixed Elo parameters, completed results before today's Eastern date, home field and offseason regression. It excludes all odds, today's scores, injuries, weather and QB inputs. This is an initial baseline, not the richer model described above.
+Validation uses revised public results and therefore is not a historically archived, point-in-time backtest. Historical market comparisons still need archived quotes and predictions.
+
 Run `node server.cjs` (Node 20+) and open http://127.0.0.1:4173/market.html.
 Without credentials the scanner uses explicitly synthetic quotes and a sample prediction.
 Set `ODDS_API_KEY` in the server environment to fetch The Odds API NFL moneylines.

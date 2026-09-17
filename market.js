@@ -4,6 +4,10 @@ const escapeText = value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':
 let snapshot;
 async function load() {
   try {
+    const setupResponse = await fetch('/api/model-status');
+    if (!setupResponse.ok) throw new Error('Model status unavailable');
+    const setup = await setupResponse.json();
+    byId('connectionStatus').textContent = `${setup.oddsConfigured?'Odds provider configured':'Odds provider key required'} · ${setup.predictions.length} baseline predictions${setup.generatedAt?' · Model updated '+new Date(setup.generatedAt).toLocaleString():''}`;
     const response = await fetch(`/api/market-scanner?book=${encodeURIComponent(byId('bookFilter').value)}`);
     if (!response.ok) throw new Error('Market data unavailable');
     snapshot = await response.json();

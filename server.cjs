@@ -4,6 +4,10 @@ const path = require('node:path');
 const {compare} = require('./market-core.cjs');
 const root = __dirname;
 let cache, cachedAt = 0;
+async function baseline() {
+  try { return JSON.parse(await fs.readFile(path.join(root,'.market-data','baseline.json'),'utf8')); }
+  catch (error) { if (error.code === 'ENOENT') return {predictions:[],validation:null}; throw error; }
+}
 async function data() {
   const now = Date.now();
   if (!process.env.ODDS_API_KEY) {
@@ -24,6 +28,13 @@ async function data() {
   })}));
   let predictions = [];
   if (process.env.PREDICTIONS_FILE) predictions = JSON.parse(await fs.readFile(process.env.PREDICTIONS_FILE,'utf8'));
+  else {
+    const model = await baseline();
+    predictions = games.flatMap(game=>{
+      const matches = model.predictions.filter(p=>p.home===game.home && p.away===game.away && Math.abs(Date.parse(p.kickoff)-Date.parse(game.kickoff))<60000 && now-Date.parse(p.timestamp)<86400000 && Date.parse(p.timestamp)<=now);
+      return matches.length===1 ? [{...matches[0],gameId:game.id}] : [];
+    });
+  }
   await fs.mkdir(path.join(root,'.market-data'),{recursive:true});
   await fs.writeFile(path.join(root,'.market-data',`${now}.json`),JSON.stringify({ingestedAt:new Date(now).toISOString(),payload,predictions}));
   cache = {mode:'live',games,predictions}; cachedAt = now;
@@ -33,6 +44,11 @@ const server = http.createServer(async(req,res)=>{
   try {
     const url = new URL(req.url,'http://localhost');
     if (url.pathname.startsWith('/api/')) {
+      if (url.pathname==='/api/model-status') {
+        const model = await baseline();
+        res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});
+        res.end(JSON.stringify({oddsConfigured:Boolean(process.env.ODDS_API_KEY),...model}));return;
+      }
       const d = await data();
       const parts = url.pathname.split('/').filter(Boolean);
       const name = parts[1], id = parts[2];

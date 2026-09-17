@@ -1,0 +1,9 @@
+{
+  "name": "sports-analytics",
+  "private": true,
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.cjs",
+    "model:refresh": "python3 build_predictions.py"
+  },
+  "engines": { "node": ">=22", "python": ">=3.9" }
+}
